@@ -1,1 +1,1 @@
-# SmartSchool
+# EduPulse
