@@ -9,6 +9,7 @@ import './App.css'
 import AboutUs from './components/AboutUs/AboutUs';
 import OurServices from './components/OurServices/OurServices';
 import Accordion from './components/FAQAccordion/FAQAccordion';
+import Dashboard from './components/Dashboard/Dashboard';
 function App() {
   return (
     <Routes>
@@ -21,6 +22,9 @@ function App() {
         <Route path='/services' element={<AboutUs />} />
         <Route path='/aboutus' element={<OurServices />} />
         <Route path='/faq' element={<Accordion />} />
+        <Route path='/admin/dashboard' element={<Dashboard Person="Admin"/>}/>
+        <Route path='/student/dashboard' element={<Dashboard Person="Student"/>}/>
+        <Route path='/teacher/dashboard' element={<Dashboard Person="Teacher"/>}/>
       </Routes>
   );
 }
