@@ -1,0 +1,13 @@
+
+users table
+admin table
+class table
+teacher table
+subject table
+parent table
+student table
+teacher_class table
+exam table
+attendance table
+mark table
+noticeboard table
