@@ -93,6 +93,8 @@ VALUES (1, 'I'),
        (7, 'VII'),
        (8, 'VIII');
 
+insert into classes (class_id, class_name) values(0, 'No');
+
 -- Create the 'students' table
 CREATE TABLE IF NOT EXISTS students (
     student_id VARCHAR(10) PRIMARY KEY,
@@ -118,8 +120,8 @@ VALUES
     ('s001', 'Aditya', 'Goyal', '2005-12-22', 'Flat 501', 'Vallabh Nagar', 'Indore', 452001, 4, 'Madhya Pradesh', 'Male', 0, '', 0),
     ('s002', 'Aditi', 'Solanki', '2005-06-20', 'Flat 502', 'Shivaji Nagar', 'Indore', 452002, 4, 'Madhya Pradesh', 'Female', 0, '', 0),
     ('s003', 'Aditya', 'Bajpai', '2005-07-25', 'Flat 503', 'Malviya Nagar', 'Indore', 452003, 4, 'Madhya Pradesh', 'Male', 0, '', 0),
-    ('s004', 'Adeesh', 'Jain', '2005-08-30', 'Flat 504', 'Mhow Naka', 'Indore', 452004, 4, 'Madhya Pradesh','Female', 0, '', 0),
-    ('s005', 'Anishiddh', 'Suryawanshi', '2005-09-05', 'Flat 505', 'Geeta Bhawan', 'Indore', 452005, 4, 'Madhya Pradesh','Male', 0, '', 0)
+    ('s004', 'Adeesh', 'Jain', '2005-08-30', 'Flat 504', 'Mhow Naka', 'Indore', 452004, 5, 'Madhya Pradesh','Female', 0, '', 0),
+    ('s005', 'Anishiddh', 'Suryawanshi', '2005-09-05', 'Flat 505', 'Geeta Bhawan', 'Indore', 452005, 6, 'Madhya Pradesh','Male', 0, '', 0)
 ;
 update students set class_id = '5' where student_id = 's004';
 update students set class_id = '6' where student_id = 's005';
@@ -214,6 +216,7 @@ CREATE TABLE IF NOT EXISTS marks (
     annual char(5) DEFAULT '',
     percent char(5) DEFAULT '',
     grade char(5) DEFAULT 'C',
+    remark char(10) DEFAULT 'PASS',
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (subject_name) REFERENCES subjects(subject_name) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -225,21 +228,25 @@ INSERT INTO marks (student_id, class_id, subject_name, MST1, MST2) VALUES
     ('s001', '4', 'Hindi', 20, 20),
     ('s001', '4', 'English', 20, 20),
     ('s001', '4', 'Social', 20, 20),
+    
     ('s002', '4', 'Maths', 15, 12),
 	('s002', '4', 'Science', 15, 12),
 	('s002', '4', 'Hindi', 15, 12),
 	('s002', '4', 'English', 15, 12),
 	('s002', '4', 'Social', 15, 12),
+    
 	('s003', '4', 'Maths', 15, 18),
 	('s003', '4', 'Science', 15, 18),
 	('s003', '4', 'Hindi', 15, 18),
 	('s003', '4', 'English', 15, 18),
 	('s003', '4', 'Social', 15, 18),
+    
 	('s004', '5', 'Maths', 18, 16),
 	('s004', '5', 'Science', 18, 16),
 	('s004', '5', 'Hindi', 18, 16),
 	('s004', '5', 'English', 18, 16),
 	('s004', '5', 'Social', 18, 16),
+    
 	('s005', '6', 'Maths', 20, 12),
 	('s005', '6', 'Science', 20, 12),
 	('s005', '6', 'Hindi', 20, 12),
@@ -251,12 +258,28 @@ select * from marks;
 
 -- Create the 'attendance' table
 CREATE TABLE IF NOT EXISTS attendance (	
-    attendance_id INT PRIMARY KEY,
+    attendance_id INT AUTO_INCREMENT PRIMARY KEY ,
     student_id VARCHAR(10) NOT NULL,
-    date DATE NOT NULL,
+    date varchar(10),
     flag INT,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+desc attendance;
+
+insert into attendance(student_id, date, flag)
+values 	('s001', '2023-09-22', '0'),
+		('s001', '2023-09-23', '0'),
+		('s001', '2023-09-24', '0'),
+        
+		('s002', '2023-09-22', '0'),
+        ('s002', '2023-09-23', '1'),
+        ('s002', '2023-09-24', '0'),
+        
+        ('s003', '2023-09-22', '0'),
+        ('s003', '2023-09-23', '0'),
+        ('s003', '2023-09-24', '0');
+select * from attendance;
+
 
 -- Create the 'announcements' table
 CREATE TABLE IF NOT EXISTS announcements (
@@ -278,5 +301,37 @@ DELIMITER ;
 SELECT t.class_id, t.subject_name, c.class_name FROM teaches t
 JOIN classes c ON c.class_id = t.class_id
 WHERE t.teacher_id = 't002' ;
-            
-SELECT class_teacher_flag FROM teachers WHERE teacher_id = 't002';
+
+SELECT t.class_teacher_flag, c.class_name from teachers t 
+	JOIN classes c ON c.class_id = t.class_teacher_flag 
+	WHERE t.teacher_id = 't002';
+    
+SELECT m.student_id, s.class_id, s.first_name, s.last_name, 
+	m.MST1, m.MST2, m.half_yearly, 
+    m.MST3, m.MST4, m.annual, 
+    m.percent, m.grade, m.remark FROM marks m
+    JOIN students s ON s.student_id = m.student_id
+    WHERE s.class_id = 6 AND m.subject_name = 'Social';
+
+select * from marks where class_id = 4;
+
+select * from marks where student_id = 's001';
+update marks set half_yearly = '100' where student_id = 's001';
+
+
+select a.student_id, a.date, a.flag from attendance a
+	where (select class_id from students where student_id = a.student_id) = '4'
+		AND date in ('2023-09-22', '2023-09-23', '2023-09-24');
+
+		
+
+update attendance set flag = '1' where student_id = 's003' and date = '2023-09-23';
+
+SELECT student_id, first_name, last_name, tot_atten_percent FROM students
+            WHERE class_id = '4';
+
+
+
+
+
+
