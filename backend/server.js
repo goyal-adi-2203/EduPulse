@@ -191,7 +191,7 @@ app.post("/teacher/getStudentDataMark", (req, res) => {
         JOIN students s ON s.student_id = m.student_id \
         WHERE s.class_id = ? AND m.subject_name = ?; ";
     
-    db.query(q1, [req.body[0], req.body.subject_name], (err, result) => {
+    db.query(q1, [req.body.class_id, req.body.subject_name], (err, result) => {
         // console.log(result);
 
         if(err) return res.json({Error: err});
@@ -207,21 +207,16 @@ app.post("/teacher/getStudentDataMark", (req, res) => {
 
 // POSTing to updateMarks
 // API to send students who belong to that class
-app.post("/teacher/getStudentDataAttendance", (req, res) => {
+app.post("/teacher/getAttendanceData", (req, res) => {
     // const { user_id, userType, class_id, subject_name } = {...req.body};
-    console.log(req.body);
-    // to get marks
-    // const q1 = "SELECT m.student_id, s.class_id, s.first_name, s.last_name, m.MST1, m.MST2, \
-    //     m.half_yearly, m.MST3, m.MST4, m.annual, m.percent, m.grade, m.remark FROM marks m \
-    //     JOIN students s ON s.student_id = m.student_id \
-    //     WHERE s.class_id = ? AND m.subject_name = ?; ";
+    console.log(req.body, "nope");
 
     const q1 = 
         "SELECT a.student_id, a.date, a.flag FROM attendance a \
             WHERE (SELECT class_id FROM students WHERE student_id = a.student_id) = '?' \
             AND date LIKE ? OR date LIKE ? OR LIKE ?;"
 
-    db.query(q1, [req.body[0], req.body.subject_name], (err, result) => {
+    db.query(q1, [req.body.student_id, req.body.subject_name], (err, result) => {
         // console.log(result);
 
         if (err) return res.json({ Error: err });
@@ -235,6 +230,24 @@ app.post("/teacher/getStudentDataAttendance", (req, res) => {
     });
 });
 
+
+app.post("/teacher/getStudentDataAttendance", (req, res) => {
+    console.log(req.body);
+    const q1 = 
+        "SELECT student_id, first_name, last_name, tot_atten_percent FROM students\
+            WHERE class_id = ?;";
+
+    db.query(q1, [req.body.class_id], (err, result) => {
+        if(err) return res.json({Error: err});
+        if(result.length > 0){
+            return res.json({Status: "Success", data: result});
+        } else {
+            console.log(result, "error");
+            return res.json({Status: "Error", Error: "No Details"});
+        }
+    });
+
+});
 
 
 
