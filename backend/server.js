@@ -196,7 +196,7 @@ app.post("/teacher/getStudentDataMark", (req, res) => {
 
         if(err) return res.json({Error: err});
         if(result.length > 0){
-            // console.log(result.length);
+            console.log(result);
             return res.json({Status: "Success", data: result});
         } else {
             console.log(result, "error");
@@ -204,6 +204,52 @@ app.post("/teacher/getStudentDataMark", (req, res) => {
         }
     });
 });
+
+// POSTing to updateMarks
+// API to update Marks
+app.post("/teacher/studentUpdateMarks", (req, res) => {
+    // console.log(req.body.studentData);
+    
+    const studentData = req.body.studentData;
+    const subject_name = req.body.subject_name.subject_name;
+    const class_id = req.body.subject_name.class_id;
+    // console.log(studentData.subject_name);
+    // console.log(req.body.subject_name);
+    var sql = "";
+
+    
+    studentData.forEach(element => {
+        const q1 = 
+            "UPDATE marks SET MST1=" + (element.MST1 || 0) + ", MST2=" + (element.MST2 || 0) + ", MST3=" + (element.MST3 || 0) + ", MST4=" + (element.MST4 || 0) + ", half_yearly=" + (element.half_yearly || 0) + ", annual=" + (element.annual || 0) + ", percent=" + (element.percent || 0) + ", grade='" + (element.grade || "'C'") + "', remark='" + (element.remark || "'PASS'") + "' WHERE student_id ='" + (element.student_id) + "' AND subject_name='" + (subject_name) +"';";
+
+        // console.log(q1,"\n");
+        sql += q1;
+    });
+    
+    // console.log(sql);
+
+    db.query(sql, (err, result) => {
+        // console.log(result);
+
+        if (err) return res.json({ Error: err });
+        return res.json({Status: "Success", data: result});
+    });
+
+})
+
+// student_id VARCHAR(10) NOT NULL,
+//     class_id INT NOT NULL,
+//         subject_name VARCHAR(50) NOT NULL,
+//             MST1 char(5) DEFAULT '',
+//                 MST2 char(5) DEFAULT '',
+//                     half_yearly char(5) DEFAULT '',
+//                         MST3 char(5) DEFAULT '',
+//                             MST4 char(5) DEFAULT '',
+//                                 annual char(5) DEFAULT '',
+//                                     percent char(5) DEFAULT '',
+//                                         grade char(5) DEFAULT 'C',
+//                                             remark char(10) DEFAULT 'PASS'
+
 
 // POSTing to updateMarks
 // API to send students who belong to that class
@@ -251,11 +297,12 @@ app.post("/teacher/getStudentDataAttendance", (req, res) => {
 
 
 
+
 // POSTing to viewMarks
 // API to send marks of student
 app.post("/student/getMarks", (req, res) => {
     const q1 = "SELECT * FROM marks WHERE student_id = ?;";
-
+    console.log(req.body.user_id);
     db.query(q1, [req.body.user_id], (err, result) => {
         if(err)                 return res.json({Error: err});
         if(result.length > 0)   return res.json({Status: "Success", data: result});
