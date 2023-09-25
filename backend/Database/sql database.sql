@@ -323,15 +323,27 @@ select a.student_id, a.date, a.flag from attendance a
 	where (select class_id from students where student_id = a.student_id) = '4'
 		AND date in ('2023-09-22', '2023-09-23', '2023-09-24');
 
-		
+
 
 update attendance set flag = '1' where student_id = 's003' and date = '2023-09-23';
 
 SELECT student_id, first_name, last_name, tot_atten_percent FROM students
             WHERE class_id = '4';
 
+update marks set half_yearly = '100' where student_id = 's001' and subject_name = 'Maths';
+select * from marks;
+select * from marks;
 
 
+UPDATE marks SET MST1=20, MST2=20, MST3=, MST4=, half_yearly=80, annual=, percent=, grade=C, remark=PASS WHERE student_id =s001 AND subject_name=English;
+UPDATE marks SET MST1=15, MST2=12, MST3=, MST4=, half_yearly=, annual=, percent=, grade=C, remark=PASS WHERE student_id =s002 AND subject_name=English;UPDATE marks SET MST1=15, 
+MST2=18, MST3=, MST4=, half_yearly=, annual=, percent=, grade=C, remark=PASS WHERE student_id =s003 AND subject_name=English;
+
+UPDATE marks SET MST1=20, MST2=20, MST3=, MST4=, half_yearly=80, annual=, percent=, grade=C, remark=PASS WHERE student_id =s001 AND subject_name=English;UPDATE marks SET MST1=15, MST2=12, MST3=, MST4=, half_yearly=, annual=, percent=, grade=C, remark=PASS WHERE student_id =s002 AND subject_name=English;UPDATE marks SET MST1=15, MST2=18, MST3=, MST4=, half_yearly=, annual=, percent=, grade=C, remark=PASS WHERE student_id =s003 AND subject_name=English;
 
 
+UPDATE marks SET MST1=20, MST2=20, MST3='', MST4='', half_yearly=60, annual='', percent='', grade='C', remark='PASS' WHERE student_id ='s001' AND subject_name='English';
+UPDATE marks SET MST1=15, MST2=12, MST3='', MST4='', half_yearly='', annual='', percent='', grade=C, remark=PASS WHERE student_id ='s002' AND subject_name='English';UPDATE marks SET MST1=15, MST2=18, MST3='', MST4='', half_yearly='', annual='', percent='', grade=C, remark=PASS WHERE student_id ='s003' AND subject_name='English';
 
+
+select * from marks where student_id='s001'; 
