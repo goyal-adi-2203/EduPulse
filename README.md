@@ -4,15 +4,17 @@ CHANGES
 
   frontend - 
   
-      UpdateAttendance
+      UpdateAttendance.js
   
       UpdateAttendance.css
       
-      ViewAttendnace
+      ViewAttendnace.js
       
       ViewAttendance.css
+
+      SidePanel.js
+      Login.js
       
-      Login
       
   backend -
       
