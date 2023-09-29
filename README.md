@@ -28,3 +28,8 @@ CHANGES
   
       ATTENDANCE table
       ANNOUNCEMENTS table
+
+  new packages - 
+
+      frontend 
+      backend
