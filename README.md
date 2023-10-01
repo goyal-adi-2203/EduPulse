@@ -31,5 +31,5 @@ CHANGES
 
   new packages - 
 
-      frontend 
-      backend
+      frontend - react-pdf, ..
+      backend - multer, ..
