@@ -449,16 +449,28 @@ CREATE TABLE IF NOT EXISTS announcements (
     usertype VARCHAR(10),
     first_name VARCHAR(30) default '',
     last_name VARCHAR(30) default '',
-    date varchar(10) not null,
+    class_id varchar(5),
+    subject_name varchar(20),
+    date varchar(20) not null,
     title varchar(255) default '',
     content text,
     imgurl text,
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE cascade ON UPDATE CASCADE
 );
 
-insert into announcements (user_id, usertype, first_name, last_name, date, title, content, imgurl)
-values ('a01', 'Admin', 'Aditya', 'Goyal', '2023-09-30', 'post1', 'First Post', '');
+insert into announcements (user_id, usertype,first_name, last_name, class_id, subject_name, date, title, content, imgurl)
+values ('a01', 'Admin', 'Aditya', 'Goyal','','', '2023-12-02', 'post1', 'First Post','');
 
-select * from announcements;
+select * from announcements order by date desc, user_id, title;
 delete from announcements;
+
+desc announcements;
+
+SELECT a.student_id, a.class_id, a.date, a.flag FROM attendance a WHERE a.class_id = 4 AND (a.date =	 '2023-09-29' OR a.date = '2023-09-30' OR a.date = '2023-09-28');
+alter table announcements modify date varchar(20);
+delete from announcements where ann_id = 9;
+select * from attendance where date like '2023-10%';
+
+
+
 
