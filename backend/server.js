@@ -30,9 +30,9 @@ const storage = multer.diskStorage({
     filename: function (req, file, cb) {
         cb(null, Date.now() + file.originalname);
     }
-})
+});
 
-const upload = multer({ storage: storage })
+const upload = multer({ storage: storage });
 
 
 const secret = "drhftvgjbhjtstzdfhxcgjh";
@@ -309,9 +309,9 @@ app.post("/teacher/getAttendanceData", (req, res) => {
     // console.log(date);
 
     const q1 = 
-        "SELECT a.student_id, a.class_id, a.date, a.flag FROM attendance a WHERE a.class_id = ? AND (a.date LIKE ? OR ? OR ?);"
+        "SELECT a.student_id, a.class_id, a.date, a.flag FROM attendance a WHERE a.class_id = ? AND (a.date = ? OR a.date = ? OR a.date = ? OR a.date = ? OR a.date = ?);"
 
-    db.query(q1, [req.body.class_id, date[0].date, date[1].date, date[2].date], (err, result) => {
+    db.query(q1, [req.body.class_id, date[0].date, date[1].date, date[2].date, date[3].date, date[4].date], (err, result) => {
         // console.log(result);
 
         if (err) return res.json({ Error: err });
@@ -410,15 +410,40 @@ app.post("/student/getAttendance", (req, res) => {
 app.post("/addAnnouncement", (req, res) => {
     // console.log(req.body);
     const values = req.body;
-
-    const q1 = "INSERT INTO announcements (user_id, usertype, first_name, last_name, date, title, content, imgurl) VALUES (?); "
+    
+    const q1 = "INSERT INTO announcements (user_id, usertype, first_name, last_name, class_id, subject_name, date, title, content, imgurl) VALUES (?); "
 
     db.query(q1, [values], (err, result) => {
         // console.log(result, "dvfbdgnhjmhkjl");
         if(err)         return res.json({Error: err});
         return res.json({ Status: "Success", data: result });
     });
-})
+});
+
+
+// getching announcements for admin
+// AdminAnns.js
+app.post("/admin/getAnnouncements", (req, res) => {
+    // console.log(req.body);
+    const user_id = req.body.user_id;
+    const userType = req.body.userType;
+
+    db.query("SELECT * FROM announcements ORDER BY date DESC, user_id;", (err, result) => {
+        // console.log(result);
+
+        if(err)         return res.status(404).json({Error: err});
+        return res.status(200).json({Status: "Success", data: result});
+    });
+});
+
+
+
+
+
+
+
+
+
 
 
 
