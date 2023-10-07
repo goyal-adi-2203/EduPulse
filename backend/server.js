@@ -76,7 +76,7 @@ db.connect((err) => {
 // poosting announcement
 app.post("/api/upload", upload.single("file"), (req, res) => {
     const file = req.file;
-    res.status(200).json({Status: "Success", data: file.filename});
+    res.status(200).json({ Status: "Success", data: file.filename });
 })
 
 
@@ -113,17 +113,138 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/admin/:id/register", async (req, res) => {
-    const sql = "INSERT INTO users (user_id, password, usertype) VALUES ?";
 
-    var values = [[req.body.username, req.body.password, req.body.userType]];
+    const check = (t) => {
+        return (t === undefined) || (t === '');
+    }
 
-    // console.log(values);
+    if (req.body.userType === "Teacher") {
+        console.log(req.body);
+        const {
+            username,
+            password,
+            userType,
+            First_name,
+            Last_name,
+            class1,
+            class2,
+            class3,
+            subject1,
+            subject2,
+            subject3,
+            class_teacher,
+            mobile,
+            flatno,
+            colony,
+            district,
+            state,
+            email,
+            gender,
+        } = req.body;
+        const sql =
+            "INSERT INTO users (user_id, password, usertype) VALUES ?; INSERT INTO teachers (teacher_id, first_name, last_name, email, phone_no, flat_no, gender, colony, district, state, class_teacher_flag) VALUES ?; INSERT INTO teaches (teacher_id,class_id,subject_name) VALUES ?;";
+        var values1 = [[username, password, userType]];
+        var values2 = [
+            [
+                username,
+                First_name,
+                Last_name,
+                email,
+                mobile,
+                flatno,
+                gender,
+                colony,
+                district,
+                state,
+                class_teacher,
+            ],
+        ];
+        var values3 = [[username, class1, subject1]];
+        if (check(class2) && check(class3)) {
+            values3 = [[username, class1, subject1]];
+        } else if (check(class3)) {
+            values3 = [
+                [username, class1, subject1],
+                [username, class2, subject2],
+            ];
+        } else {
+            values3 = [
+                [username, class1, subject1],
+                [username, class2, subject2],
+                [username, class3, subject3],
+            ];
+        }
+        // console.log(class2);
+        // console.log(values1);
+        // console.log(values2);
 
-    db.query(sql, [values], (err, result) => {
-        if (err) return res.json({ Error: "Error in Storing" });
-        return res.json({ Status: "Success" });
-    });
+        db.query(sql, [values1, values2, values3], (err, result) => {
+            if (err) return res.json({ Error: "Error in Storing", err });
+            return res.status(200).json({ Status: "Success", result });
+        });
+    } else if (req.body.userType === "Student") {
+        const {
+            username,
+            password,
+            userType,
+            First_name,
+            Last_name,
+            student_class,
+            mobile,
+            flatno,
+            colony,
+            district,
+            state,
+            email,
+            gender,
+            Father_name,
+            Mother_name,
+        } = req.body;
+
+        const sql =
+            "INSERT INTO users (user_id, password, usertype) VALUES ?; INSERT INTO students (student_id, first_name, last_name, flat_no, colony, district, class_id, state, gender) VALUES ?; INSERT INTO parents (student_id, Father_name, Mother_name, phone_no, email_id) VALUES ?; SELECT subject_name from subjects where class_id= ?";
+        var values1 = [[username, password, userType]];
+        var values2 = [
+            [
+                username,
+                First_name,
+                Last_name,
+                flatno,
+                colony,
+                district,
+                student_class,
+                state,
+                gender,
+            ],
+        ];
+        var data = [];
+        var values3 = [[username, Father_name, Mother_name, mobile, email]];
+        const sql2 =
+            "INSERT INTO marks (student_id, class_id, subject_name) VALUES ?";
+        db.query(sql, [values1, values2, values3, student_class], (err, result) => {
+            if (err) return res.status(500).json({ Error: "Error in Storing", err });
+            const sub1 = result[3][0].subject_name;
+            const sub2 = result[3][1].subject_name;
+            const sub3 = result[3][2].subject_name;
+            const sub4 = result[3][3].subject_name;
+            const sub5 = result[3][4].subject_name;
+            var values4 = [
+                [username, student_class, sub1],
+                [username, student_class, sub2],
+                [username, student_class, sub3],
+                [username, student_class, sub4],
+                [username, student_class, sub5],
+            ];
+            db.query(sql2, [values4], (err2, result2) => {
+                if (err2) console.log(err2);
+            });
+
+            return res.status(200).json({ Status: "Success", result });
+        });
+    }
 });
+
+
 
 // app.get("/teacher/dashboard/:id", verifyToken, async (req, res) => {
 //   let tokenHeaderKey = process.env.TOKEN_HEADER_KEY;
@@ -142,6 +263,8 @@ app.post("/admin/:id/register", async (req, res) => {
 //   }
 // });
 
+
+
 app.get("/adminCount", (req, res) => {
     const sql =
         "Select count(user_id) as admin from users where usertype = 'Admin'";
@@ -150,6 +273,7 @@ app.get("/adminCount", (req, res) => {
         return res.json(result);
     });
 });
+
 app.get("/teacherCount", (req, res) => {
     const sql =
         "Select count(user_id) as teacher from users where usertype = 'Teacher'";
@@ -171,9 +295,12 @@ app.get("/studentCount", (req, res) => {
 app.post("/getData", (req, res) => {
     const user_id = req.body.user_id;
     const userType = req.body.userType;
+    // console.log(req.body);
 
-    if (userType === "Student"){
-        db.query("SELECT * FROM students s JOIN parents p ON p.student_id = s.student_id WHERE s.student_id = ?;",[user_id], (err, result) => {
+    if (userType == "Student") {
+        // console.log("student");
+        db.query("SELECT * FROM students s JOIN parents p ON p.student_id = s.student_id WHERE s.student_id = ?;", [user_id], (err, result) => {
+            // console.log(result);
             if (err) return res.json({ Error: err });
             if (result.length > 0) {
                 // console.log(result);
@@ -182,7 +309,7 @@ app.post("/getData", (req, res) => {
                 return res.json({ Status: "Error", Error: "No Details" });
             }
         });
-    } else if (userType === "Admin") {
+    } else if (userType == "Admin") {
         db.query("SELECT * FROM admin WHERE admin_id = ?;", [user_id], (err, result) => {
             if (err) return res.json({ Error: err });
             if (result.length > 0) {
@@ -192,7 +319,7 @@ app.post("/getData", (req, res) => {
                 return res.json({ Status: "Error", Error: "No Details" });
             }
         });
-    } else if(userType === "Teacher"){
+    } else if (userType == "Teacher") {
         db.query("SELECT * FROM teachers WHERE teacher_id = ?;", [user_id], (err, result) => {
             if (err) return res.json({ Error: err });
             if (result.length > 0) {
@@ -210,30 +337,30 @@ app.post("/getData", (req, res) => {
 // API to sent classes for a teacher and 
 // to send classTeacher flag for the teacher
 app.post("/teacher/getClasses", (req, res) => {
-    const {user_id, userType} = {...req.body};
+    const { user_id, userType } = { ...req.body };
     // console.log(req.body);
 
     // to send classes
-    const q1 = 
+    const q1 =
         "SELECT t.class_id, t.subject_name, c.class_name FROM teaches t JOIN classes c ON c.class_id = t.class_id WHERE t.teacher_id = ? ";
 
     // send class teacher flag
-    const q2 = 
+    const q2 =
         "SELECT t.class_teacher_flag, c.class_name from teachers t \
             JOIN classes c ON c.class_id = t.class_teacher_flag \
             WHERE t.teacher_id = ?";
 
-    const sql = q1+';'+q2+';';
-    
+    const sql = q1 + ';' + q2 + ';';
+
     db.query(sql, [req.body.user_id, req.body.user_id], (err, result) => {
         // console.log(result);
 
         if (err) return res.json({ Error: err });
         if (result.length > 0) {
             // console.log(result.length);
-            return res.json({Status: "Success", data: result});
+            return res.json({ Status: "Success", data: result });
         } else {
-            return res.json({ Status: "Error", Error: "No Details"});
+            return res.json({ Status: "Error", Error: "No Details" });
         }
     });
 
@@ -250,17 +377,17 @@ app.post("/teacher/getStudentDataMark", (req, res) => {
         m.half_yearly, m.MST3, m.MST4, m.annual, m.percent, m.grade, m.remark FROM marks m \
         JOIN students s ON s.student_id = m.student_id \
         WHERE s.class_id = ? AND m.subject_name = ?; ";
-    
+
     db.query(q1, [req.body.class_id, req.body.subject_name], (err, result) => {
         // console.log(result);
 
-        if(err) return res.json({Error: err});
-        if(result.length > 0){
+        if (err) return res.json({ Error: err });
+        if (result.length > 0) {
             // console.log(result);
-            return res.json({Status: "Success", data: result});
+            return res.json({ Status: "Success", data: result });
         } else {
             console.log(result, "error");
-            return res.json({Status: "Error", Error: "No Details"});
+            return res.json({ Status: "Error", Error: "No Details" });
         }
     });
 });
@@ -269,7 +396,7 @@ app.post("/teacher/getStudentDataMark", (req, res) => {
 // API to update Marks
 app.post("/teacher/studentUpdateMarks", (req, res) => {
     // console.log(req.body.studentData);
-    
+
     const studentData = req.body.studentData;
     const subject_name = req.body.subject_name.subject_name;
     const class_id = req.body.subject_name.class_id;
@@ -277,22 +404,22 @@ app.post("/teacher/studentUpdateMarks", (req, res) => {
     // console.log(req.body.subject_name);
     var sql = "";
 
-    
+
     studentData.forEach(element => {
-        const q1 = 
-            "UPDATE marks SET MST1=" + (element.MST1 || 0) + ", MST2=" + (element.MST2 || 0) + ", MST3=" + (element.MST3 || 0) + ", MST4=" + (element.MST4 || 0) + ", half_yearly=" + (element.half_yearly || 0) + ", annual=" + (element.annual || 0) + ", percent=" + (element.percent || 0) + ", grade='" + (element.grade || "'C'") + "', remark='" + (element.remark || "'PASS'") + "' WHERE student_id ='" + (element.student_id) + "' AND subject_name='" + (subject_name) +"';";
+        const q1 =
+            "UPDATE marks SET MST1=" + (element.MST1 || 0) + ", MST2=" + (element.MST2 || 0) + ", MST3=" + (element.MST3 || 0) + ", MST4=" + (element.MST4 || 0) + ", half_yearly=" + (element.half_yearly || 0) + ", annual=" + (element.annual || 0) + ", percent=" + (element.percent || 0) + ", grade='" + (element.grade || "'C'") + "', remark='" + (element.remark || "'PASS'") + "' WHERE student_id ='" + (element.student_id) + "' AND subject_name='" + (subject_name) + "';";
 
         // console.log(q1,"\n");
         sql += q1;
     });
-    
+
     // console.log(sql);
 
     db.query(sql, (err, result) => {
         // console.log(result);
 
         if (err) return res.json({ Error: err });
-        return res.json({Status: "Success", data: result});
+        return res.json({ Status: "Success", data: result });
     });
 
 })
@@ -308,7 +435,7 @@ app.post("/teacher/getAttendanceData", (req, res) => {
     const date = [...req.body.dates];
     // console.log(date);
 
-    const q1 = 
+    const q1 =
         "SELECT a.student_id, a.class_id, a.date, a.flag FROM attendance a WHERE a.class_id = ? AND (a.date = ? OR a.date = ? OR a.date = ? OR a.date = ? OR a.date = ?);"
 
     db.query(q1, [req.body.class_id, date[0].date, date[1].date, date[2].date, date[3].date, date[4].date], (err, result) => {
@@ -329,18 +456,18 @@ app.post("/teacher/getAttendanceData", (req, res) => {
 // fetching students list for attendance
 app.post("/teacher/getStudentDataAttendance", (req, res) => {
     // console.log(req.body);
-    const q1 = 
+    const q1 =
         "SELECT student_id, first_name, last_name, tot_atten_percent FROM students\
             WHERE class_id = ?;";
 
     db.query(q1, [req.body.class_id], (err, result) => {
-        if(err) return res.json({Error: err});
-        if(result.length > 0){
+        if (err) return res.json({ Error: err });
+        if (result.length > 0) {
             // console.log(result);
-            return res.json({Status: "Success", data: result});
+            return res.json({ Status: "Success", data: result });
         } else {
             console.log(result, "error");
-            return res.json({Status: "Error", Error: "No Details"});
+            return res.json({ Status: "Error", Error: "No Details" });
         }
     });
 
@@ -354,18 +481,18 @@ app.post("/teacher/updateAttendance", (req, res) => {
     const attendance = req.body.attendanceRecord;
 
     // console.log(attendance);
-    
+
     var sql = "";
     attendance.forEach((ele) => {
-        const q1 = 
-        "INSERT INTO attendance(student_id, class_id, date, flag) \
+        const q1 =
+            "INSERT INTO attendance(student_id, class_id, date, flag) \
             VALUES('" + (ele.student_id) + "',"
-                + class_id +" ,'"
-                + (ele.date) +"','"
-                + (ele.flag) +"') AS alias\
+            + class_id + " ,'"
+            + (ele.date) + "','"
+            + (ele.flag) + "') AS alias\
             ON DUPLICATE KEY UPDATE \
             flag = alias.flag;"
-        
+
         // console.log(q1);
         sql += q1;
         // console.log(sql);
@@ -386,9 +513,9 @@ app.post("/student/getMarks", (req, res) => {
     const q1 = "SELECT * FROM marks WHERE student_id = ?;";
     // console.log(req.body.user_id);
     db.query(q1, [req.body.user_id], (err, result) => {
-        if(err)                 return res.json({Error: err});
-        if(result.length > 0)   return res.json({Status: "Success", data: result});
-        else                    return res.json({Status: "Error", Error: "No Details"});
+        if (err) return res.json({ Error: err });
+        if (result.length > 0) return res.json({ Status: "Success", data: result });
+        else return res.json({ Status: "Error", Error: "No Details" });
     });
 });
 
@@ -399,9 +526,9 @@ app.post("/student/getAttendance", (req, res) => {
     // console.log(req.body);
     const q1 = "SELECT * FROM attendance WHERE student_id = ?"
     db.query(q1, [req.body.student_id], (err, result) => {
-        if (err)                return res.json({ Error: err });
-        if (result.length > 0)  return res.json({ Status: "Success", data: result });
-        else                    return res.json({ Status: "Error", Error: "No Details" });
+        if (err) return res.json({ Error: err });
+        if (result.length > 0) return res.json({ Status: "Success", data: result });
+        else return res.json({ Status: "Error", Error: "No Details" });
     });
 });
 
@@ -410,12 +537,12 @@ app.post("/student/getAttendance", (req, res) => {
 app.post("/addAnnouncement", (req, res) => {
     // console.log(req.body);
     const values = req.body;
-    
+
     const q1 = "INSERT INTO announcements (user_id, usertype, first_name, last_name, class_id, subject_name, date, title, content, imgurl) VALUES (?); "
 
     db.query(q1, [values], (err, result) => {
         // console.log(result, "dvfbdgnhjmhkjl");
-        if(err)         return res.json({Error: err});
+        if (err) return res.json({ Error: err });
         return res.json({ Status: "Success", data: result });
     });
 });
@@ -431,24 +558,75 @@ app.post("/admin/getAnnouncements", (req, res) => {
     db.query("SELECT * FROM announcements ORDER BY date DESC, user_id;", (err, result) => {
         // console.log(result);
 
-        if(err)         return res.status(404).json({Error: err});
-        return res.status(200).json({Status: "Success", data: result});
+        if (err) return res.status(404).json({ Error: err });
+        return res.status(200).json({ Status: "Success", data: result });
+    });
+});
+
+
+
+// getching announcements for admin
+// TeacherAnns.js
+app.post("/teacher/getAnnouncements", (req, res) => {
+    // console.log(req.body);
+    const user_id = req.body.user_id;
+    const userType = req.body.userType;
+
+    db.query("SELECT * FROM announcements ORDER BY date DESC, user_id;", (err, result) => {
+        // console.log(result);
+
+        if (err) return res.status(404).json({ Error: err });
+        return res.status(200).json({ Status: "Success", data: result });
+    });
+});
+
+
+// getching announcements for admin
+// StudentAnns.js
+app.post("/student/getAnnouncements", (req, res) => {
+    // console.log(req.body);
+    const user_id = req.body.user_id;
+    const userType = req.body.userType;
+
+    db.query("select * from announcements where class_id = '' or class_id = (select class_id from students where student_id = ?) order by date desc, user_id;", [user_id], (err, result) => {
+        // console.log(result);
+
+        if (err) return res.status(404).json({ Error: err });
+        return res.status(200).json({ Status: "Success", data: result });
     });
 });
 
 
 
 
+// // search keyword
+// app.post("/searchKeyword", (req, res) => {
+//     // console.log(req.body[0]);
+//     var word = req.body[0];
 
 
+//     var q1 = "SELECT * FROM announcements WHERE (title like '%" + word + "%' or content like '%" + word + "%' or first_name like '%" + word + "%' or last_name like '%" + word + "%' or subject_name like '%" + word + "%' or class_id like '%" + word + "%' or usertype like '%" + word + "%') ORDER BY date desc, user_id;"
 
 
+//     db.query(q1, (err, result) => {
+//         console.log(err);
+//         if (err) return res.status(404).json({ Error: err });
+//         return res.status(200).json({ Status: "Success", data: result });
+//     })
+// });
 
+app.post("/student/getSubjects", (req, res) => {
+    const user_id = req.body.user_id;
+    // console.log(user_id);
+    db.query("SELECT subject_name FROM subjects WHERE class_id = (SELECT class_id FROM students WHERE student_id = ?);", [user_id], (err, result) => {
+        // console.log(result);
+        if(err) return res.json({Error: err});
+        return res.json({Status: "Success", data: result});
+    });
+});
 
 
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
-
-
