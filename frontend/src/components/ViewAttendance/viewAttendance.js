@@ -6,6 +6,7 @@ import Calendar from "react-calendar";
 import "./viewAttendance.css";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
+import { LeaveDialogBox, LeavePopUp } from "../Leave/ApplyLeave";
 
 function ViewAttendance() {
     // JWT token
@@ -18,13 +19,13 @@ function ViewAttendance() {
     let todayDate = today.getDate();
     let todayMonth = today.getMonth() + 1;
     let todayYear = today.getFullYear();
-    if (today.getMonth()+1 < 10) todayMonth = "0" + todayMonth;
+    if (today.getMonth() + 1 < 10) todayMonth = "0" + todayMonth;
     if (today.getDate() < 10) todayDate = "0" + todayDate;
     const [value, onChange] = useState(new Date());
     // const element = document.getElementById()
 
     const values = {
-        "student_id": user_id
+        student_id: user_id,
     };
 
     // console.log('values', values );
@@ -33,7 +34,6 @@ function ViewAttendance() {
     const [error, setError] = useState("");
 
     useEffect(() => {
-
         axios
             .post("http://localhost:4000/student/getAttendance", values)
             .then((res) => {
@@ -72,17 +72,17 @@ function ViewAttendance() {
                             if (month < 10) month = "0" + month;
                             if (day < 10) day = "0" + day;
 
-                            var realDate = date.getFullYear() + '-' + month + '-' + day;
+                            var realDate = date.getFullYear() + "-" + month + "-" + day;
                             var obj = studentData.find((val) => {
                                 return val.date === realDate;
                             });
 
                             if (obj) {
-                                if (obj.flag === '0') {
+                                if (obj.flag === "0") {
                                     return "green";
-                                } else if (obj.flag === '1') {
+                                } else if (obj.flag === "1") {
                                     return "red";
-                                } else if (obj.flag === '2') {
+                                } else if (obj.flag === "2") {
                                     return "purple";
                                 }
                             }
@@ -91,6 +91,9 @@ function ViewAttendance() {
                     />
                 </div>
             </div>
+
+            <LeaveDialogBox/>   
+            <LeavePopUp />
         </div>
     );
 }
