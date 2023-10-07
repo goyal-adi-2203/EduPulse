@@ -3,8 +3,10 @@
 CHANGES
 
   frontend - 
-  
+
+      ViewAttendance.js
       NEW component folder Announcement
+      NEW component folder Leave
       
   backend -
       
