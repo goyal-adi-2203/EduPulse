@@ -1,7 +1,7 @@
 create database edupulse;
 use edupulse;
 drop database edupulse;
--- Create the database if it doesn't exist
+
 CREATE DATABASE IF NOT EXISTS edupulse_2;
 USE edupulse_2;
 
@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS teachers (
     FOREIGN KEY (teacher_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+alter table teachers drop column pin_code;
 desc teachers;
 
 INSERT INTO teachers (teacher_id, first_name, last_name, email, phone_no, flat_no, gender, colony, district, state, pin_code, class_teacher_flag)
@@ -73,9 +74,11 @@ VALUES
     ('t002', 'Priya', 'Sharma', 'priya.sharma@example.com', '+91 98765 43210', 'Apt 202', 'Female', 'Malviya Nagar', 'Mumbai', 'Maharashtra', 400001, 0),
     ('t003', 'Amit', 'Singh', 'amit.singh@example.com', '+91 55555 55555', 'Suite 303', 'Male', 'Rajwada', 'Bhopal', 'Madhya Pradesh', 462001, 0);
 
-INSERT INTO 
+-- INSERT INTO 
+select * from teaches;
 select * from teachers; 
-
+select * from users;
+delete from users where user_id = 't005';
     
     
 -- Create the 'classes' table
@@ -120,6 +123,8 @@ CREATE TABLE IF NOT EXISTS students (
     FOREIGN KEY (class_id) REFERENCES classes(class_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+alter table students drop column pin_code;
+
 INSERT INTO students (student_id, first_name, last_name, DOB, flat_no, colony, district, pin_code, class_id, state, gender, result_percent, result_status, tot_atten_percent)
 VALUES
     ('s001', 'Aditya', 'Goyal', '2005-12-22', 'Flat 501', 'Vallabh Nagar', 'Indore', 452001, 4, 'Madhya Pradesh', 'Male', 0, '', 0),
@@ -131,7 +136,7 @@ VALUES
 update students set class_id = '5' where student_id = 's004';
 update students set class_id = '6' where student_id = 's005';
 
-select * from students;
+select * from teaches;
 
 -- Create the 'parents' table'
 CREATE TABLE IF NOT EXISTS parents (
@@ -461,15 +466,64 @@ CREATE TABLE IF NOT EXISTS announcements (
 insert into announcements (user_id, usertype,first_name, last_name, class_id, subject_name, date, title, content, imgurl)
 values ('a01', 'Admin', 'Aditya', 'Goyal','','', '2023-12-02', 'post1', 'First Post','');
 
-select * from announcements order by date desc, user_id, title;
+select * from announcements where class_id = '' or class_id = (select class_id from students where student_id = 's001') order by date desc, user_id;
 delete from announcements;
 
+select * from announcements;
 desc announcements;
 
 SELECT a.student_id, a.class_id, a.date, a.flag FROM attendance a WHERE a.class_id = 4 AND (a.date =	 '2023-09-29' OR a.date = '2023-09-30' OR a.date = '2023-09-28');
 alter table announcements modify date varchar(20);
 delete from announcements where ann_id = 9;
 select * from attendance where date like '2023-10%';
+
+select * from students;
+select * from marks;
+
+select * from announcements order by title;
+select * from announcements where title like "%post2%" or content like "%post2%";
+
+select * from announcements where title like "%%" or content like "%%";
+select * from announcements where user_id like "%a%";
+select * from announcements where user_id like "%%%";
+
+delete from announcements where user_id = 't002' limit 2;
+
+select * from announcements where user_id like "%" and (title like "%%" or content like "%%" or first_name like "%%" or last_name like "%%" or subject_name like "%%" or class_id like "%%" or usertype like "%%") order by date desc, title desc;
+
+SELECT * FROM students s JOIN parents p ON p.student_id = s.student_id WHERE s.student_id = 's002';
+select * from parents;
+select * from students;
+insert into parents(student_id, Father_name, Mother_name, phone_no, email_id)
+values ('s002', 'Father Solanki', 'Mother Solanki', '9876543210', 'solan.kii@gmail.com'),
+		('s004', 'Father Jain', 'Mother Jain', '9876543210', 'jain.adeesh@gmail.com'),
+        ('s005', 'Father Ani', 'Mother Ani', '9876543210', 'ani.shiddh@gmail.com');
+
+
+select * from students;
+
+SELECT * FROM announcements WHERE user_id like 'a%' and (title like '%%' or content like '%%' or first_name like '%%' or last_name like '%%' or subject_name like '%%' or class_id like '%%' or usertype like '%%') ORDER BY date desc, title, user_id;
+
+use edupulse_2;
+select * from announcements;
+
+select * from (select ann_id, CONCAT(title, '|', content, '|', subject_name) txt from announcements) announcements
+where txt like '%announcement%';
+
+select * from announcements where '' in (user_id, usertype, first_name, last_name, class_id, subject_name, date, title, content, imgurl);
+
+alter table announcements 
+add fulltext(usertype, first_name, last_name, class_id, subject_name, date, title, content, imgurl);
+
+select * from announcements;
+desc announcements;
+
+select * from announcements
+where match(usertype, first_name, last_name, class_id, subject_name, date, title, content, imgurl)
+against ('Admin');
+
+select subject_name, class_id from subjects where class_id = (select class_id from students where student_id = 's001');
+
 
 
 
