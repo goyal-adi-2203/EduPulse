@@ -206,16 +206,7 @@ values ('t001', '4', 'English'),
 select * from teaches;
 
 
--- Create the 'leaves' table
-CREATE TABLE IF NOT EXISTS leaves (
-    id INT PRIMARY KEY,
-    student_id VARCHAR(10) NOT NULL,
-    date_asked DATE NOT NULL,
-    date_from DATE NOT NULL,
-    date_to DATE NOT NULL,
-    reason VARCHAR(255) NOT NULL,
-    FOREIGN KEY (student_name) REFERENCES students(student_name) ON DELETE CASCADE ON UPDATE CASCADE
-);
+
 
 -- Create the 'marks' table
 CREATE TABLE IF NOT EXISTS marks (
@@ -524,7 +515,36 @@ against ('Admin');
 
 select subject_name, class_id from subjects where class_id = (select class_id from students where student_id = 's001');
 
+use edupulse_2;
+-- Create the 'leaves' table
+CREATE TABLE leaves (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id VARCHAR(10) NOT NULL,
+    class_id int,
+    date_asked varchar(20) NOT NULL,
+    date_from varchar(20) NOT NULL,
+    date_to varchar(20) NOT NULL,
+    subject text,
+    reason text,
+    accepted int default 0,
+    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+desc leaves;
 
 
+insert into leaves(student_id, class_id, date_asked, date_from, date_to, subject, reason)
+values ('s003', 4, '2023-10-07', '2023-10-09', '2023-10-10', 'e', 'fffffff');
 
+select * from leaves;	
+delete from leaves where id=10;
 
+desc attendance;
+update attendance set flag = '1' where student_id = 's003' and date ='2023-10-09';
+delete from attendance where date='2023-10-09';
+select * from attendance where date='2023-10-09';
+
+delete from attendance limit 10;
+
+UPDATE leaves SET accepted = 1 WHERE id= 1;
+SELECT l.*, s.* FROM leaves l JOIN students s ON s.student_id = l.student_id WHERE l.class_id = 4;
