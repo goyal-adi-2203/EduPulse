@@ -4,10 +4,15 @@ CHANGES
 
   frontend - 
 
+      App.js
       ViewAttendance.js
-      NEW component folder Announcement
+      Teacher Side Panel (SidePanel.js)
+      UpdateAttendance.js
       NEW component folder Leave
-      
+
+          ApplyLeave.js
+          LeaveReqList.js
+  
   backend -
       
       server.js
@@ -15,5 +20,8 @@ CHANGES
   database -
 
       queries in sql database.sql
+      leaves table 
 
   new packages - 
+
+      frontend: react-date-range
