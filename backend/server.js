@@ -625,8 +625,105 @@ app.post("/student/getSubjects", (req, res) => {
     });
 });
 
+// get class of student
+app.post("/student/getClass", (req, res) => {
+    const user_id = req.body.user_id;
+
+    db.query("SELECT class_id FROM students WHERE student_id = ?", [user_id], (err, result) => {
+        if (err) return res.json({ Error: err });
+        return res.json({ Status: "Success", data: result });
+    });
+});
+
+// apply for leave for student
+app.post("/student/applyLeave", (req, res) => {
+    console.log(req.body);
+
+    const values = [
+        req.body.user_id,
+        req.body.class_id,
+        req.body.today,
+        req.body.startdate,
+        req.body.enddate,
+        req.body.subject,
+        req.body.reason,
+    ];
+    
+    db.query("INSERT INTO leaves (student_id, class_id, date_asked, date_from, date_to, subject, reason) VALUES (?);", [values], (err, result) => {
+
+        if(err) return res.json({Error: err});
+        return res.json({Status: "Success"});
+    });
+});
+
+
+// getting the leave reqs for the teacher of her class
+app.post("/teacher/getLeaveReqs", (req, res) => {
+    // console.log(req.body);
+
+    const q1 = 
+        "SELECT l.*, s.* FROM leaves l JOIN students s ON s.student_id = l.student_id WHERE l.class_id = ? ORDER BY l.date_asked DESC, l.student_id;";
+
+    db.query(q1, [req.body.class_id], (err, result) => {
+        // console.log(result);
+
+        if(err) return res.json({Error: err});
+        return res.json({Status: "Success", data: result});
+    });
+});
+
+// accepting or denying leave
+app.post("/teacher/leaveAccept", (req, res) => {
+    // console.log(req.body);
+    const q1 = 
+        "UPDATE leaves SET accepted = ? WHERE id= ?;";
+    
+    db.query(q1,[req.body.accepted, req.body.id], (err, result) => {
+        if (err) return res.json({ Error: err });
+        return res.json({ Status: "Success"});
+    });
+});
+
+// fetching leave reqs for attendance
+app.post("/teacher/getLeaves", (req, res) => {
+    const q1 = 
+        "SELECT id, student_id, class_id, date_from, date_to, accepted FROM leaves WHERE class_id=? AND accepted=1;"
+    
+    db.query(q1, [req.body.class_id], (err, result) => {
+        // console.log(result);
+        if (err) return res.json({ Error: err });
+        return res.json({ Status: "Success", data: result });
+    });
+});
+
+
+// setting flag to 2 when on leave
+app.post("/teacher/enterLeaveAttendance", (req, res) => {
+    // console.log(req.body);
+
+    const values = [
+        req.body.student_id,
+        req.body.class_id,
+        req.body.date,
+        req.body.flag
+    ];
+
+    const q1 =
+        "INSERT INTO attendance(student_id, class_id, date, flag) \
+        VALUES(?) AS alias\
+        ON DUPLICATE KEY UPDATE \
+        flag = alias.flag;";
+
+    // console.log(values);
+    db.query(q1, [values], (err, result) => {
+        if (err) return res.json({ Error: err });
+        return res.json({ Status: "Success"});
+    });
+});
 
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
+
+
