@@ -860,14 +860,17 @@ app.get("/get/:teacher_id", (req, res) => {
 // });
 app.put("/update/:teacher_id", (req, res) => {
 	const teacher_id = req.params.teacher_id;
-	const { first_name, last_name, email, phone_no, gender, address } =
+    // console.log(req.body);
+	const { first_name, last_name, email, phone_no, gender, colony, flat_no, district } =
 		req.body;
 
+    // console.log(req.body);
+
 	const sql =
-		"UPDATE teachers SET first_name = ?, last_name = ?, email = ?, phone_no = ?, gender = ?, colony = ? WHERE teacher_id = ?";
+		"UPDATE teachers SET first_name = ?, last_name = ?, email = ?, phone_no = ?, gender = ?, colony = ?, district = ?, flat_no = ? WHERE teacher_id = ?";
 	db.query(
 		sql,
-		[first_name, last_name, email, phone_no, gender, address, teacher_id],
+		[first_name, last_name, email, phone_no, gender, colony, district, flat_no, teacher_id],
 		(err, result) => {
 			if (err) {
 				return res.json({ Error: "Update teacher error in SQL" });
